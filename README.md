@@ -11,4 +11,4 @@
 - Can turn off sliders
 - [All files avaliable](https://github.com/maxwelllokshin1/Solar-System-Simulator)
 
-  
+![solarSystemSim](https://github.com/user-attachments/assets/4de039bc-b4e7-4ef1-b098-6dc62cfb8967)
