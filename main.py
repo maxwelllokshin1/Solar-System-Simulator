@@ -1,5 +1,6 @@
 import pygame
 import math
+import keyboard
 from constants import *
 from planet_classes import *
 from background import *
@@ -58,16 +59,13 @@ def main():
 
     selected_planet = None # Current planet selected
     planetClicked = False # Is the planet cilcked?
+    camera_follow = False # Flag to indicate if the camera is following a planet
 
     # Moving screen?
     moveScreen = False
 
     # The zoom
     zoom_level = 10.0
-
-    # Since all planets will be located at top left of screen, adjust their offset according to the WIDTH, HEIGHT, and screen
-    offset_x = (WIDTH - SCREEN_WIDTH) //2
-    offset_y = (HEIGHT - SCREEN_HEIGHT) //2
 
     # Last mouse position
     last_mouse_pos = None
@@ -82,6 +80,16 @@ def main():
 
     allSliders = [sunMass, zoom, speedUp] # slider array
 
+
+    # Since all planets will be located at top left of screen, adjust their offset according to the WIDTH, HEIGHT, and screen
+    offset_x = (WIDTH - SCREEN_WIDTH) //2
+    offset_y = (HEIGHT - SCREEN_HEIGHT) //2
+
+
+
+    move_camera_x = offset_x
+    move_camera_y = offset_y
+
      # Run program
     while running:
         clock.tick(FPS) # Run based on FPS
@@ -89,9 +97,31 @@ def main():
         mouse_pos = pygame.mouse.get_pos()  # get the mouse position
 
         # Current backgorund information
-        scaled_bg = background_handler.get_scaled_image(zoom_level)
+        scaled_bg = background_handler.get_scaled_image(10)
         width_bg = (scaled_bg.get_width() - SCREEN_WIDTH) //2
         height_bg = (scaled_bg.get_height() - SCREEN_HEIGHT) //2
+
+        if keyboard.is_pressed('down'):
+            dx = 0
+            dy = 10
+        elif keyboard.is_pressed('up'):
+            dx = 0
+            dy = -10
+        elif keyboard.is_pressed('left'):
+            dx = -10
+            dy = 0
+        elif keyboard.is_pressed('right'):
+            dx = 10
+            dy = 0
+        else:
+            dx = 0
+            dy = 0
+        
+        if not camera_follow:
+            move_camera_x += dx  
+            move_camera_y += dy
+            move_camera_x = max(SCREEN_WIDTH, min(move_camera_x, WIDTH - SCREEN_WIDTH))
+            move_camera_y = max(SCREEN_HEIGHT, min(move_camera_y, HEIGHT - SCREEN_HEIGHT))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -102,9 +132,8 @@ def main():
                 last_mouse_pos = None
 
             if event.type == pygame.MOUSEMOTION:
-                if desc_checkbox.checked:
-                    for obj in objects:
-                        obj.handle_hover(mouse_pos, offset_x, offset_y)
+                for obj in objects:
+                    obj.handle_hover(mouse_pos, move_camera_x, move_camera_y)
 
                 if not sliderList_checkbox.checked:
                     for sliders in allSliders:
@@ -137,14 +166,6 @@ def main():
                     # adjusted_fps = int(FPS * fps_multiplier)  # Adjust FPS based on multiplier
                     # clock.tick(adjusted_fps)
                     # sun.mass = SUN_MASS * speed_multiplier
-                if moveScreen and last_mouse_pos:
-                    dx = (mouse_pos[0] - last_mouse_pos[0]) / 10
-                    dy = (mouse_pos[1] - last_mouse_pos[1]) / 10
-                    offset_x -= dx  
-                    offset_y -= dy
-
-                offset_x = max(SCREEN_WIDTH, min(offset_x, WIDTH - SCREEN_WIDTH))
-                offset_y = max(SCREEN_HEIGHT, min(offset_y, HEIGHT - SCREEN_HEIGHT))
 
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -159,32 +180,45 @@ def main():
                     moveScreen = True
                     last_mouse_pos = mouse_pos
 
-                if desc_checkbox.checked:
-                    if not selected_planet:
-                        for obj in objects:
-                            if math.sqrt((mouse_pos[0] + offset_x - obj.adjusted_x)**2 + ((mouse_pos[1] + offset_y) - obj.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level):
-                                print("CLICKED ", obj.name, " ", ((mouse_pos[0] + offset_x) - obj.x))
-                                selected_planet = obj
-                                planetClicked = True
-                                break
-                                
-                    elif selected_planet and planetClicked:
-                        planetClicked = False
+                
+                if not selected_planet:
+                    for obj in objects:
+                        if math.sqrt((mouse_pos[0] + move_camera_x - obj.adjusted_x)**2 + ((mouse_pos[1] + move_camera_y) - obj.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level):
+                            selected_planet = obj
+                            planetClicked = True
+                            camera_follow = True
+                            break
+                elif selected_planet and desc_checkbox.checked:
+                    selected_planet = movePlanet((selected_planet.x, selected_planet.y), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
+                    selected_planet = None
+                elif selected_planet and math.sqrt((mouse_pos[0] + move_camera_x - selected_planet.adjusted_x)**2 + ((mouse_pos[1] + move_camera_y) - selected_planet.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level) and camera_follow:
+                    camera_follow = False
+                    selected_planet = None
+                    # move_camera_x = offset_x
+                    # move_camera_y = offset_y
+                # elif selected_planet and planetClicked:
+                #     planetClicked = False
 
-                    print("OFFSET: ", offset_x * (zoom_level/10), " ", offset_y * (zoom_level/10))
-                    if selected_planet and not planetClicked:
-                        selected_planet = movePlanet((selected_planet.x, selected_planet.y), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
-                        selected_planet = None
 
+                    # planetPos = (selected_planet.x,selected_planet.y)
+                    # print((-selected_planet.x,-selected_planet.y), " ", (-width_bg,-height_bg))
+                    # selected_planet = None
+
+        if camera_follow and selected_planet and not desc_checkbox.checked:
+            move_camera_x = selected_planet.x - SCREEN_WIDTH//2 - selected_planet.rad
+            move_camera_y = selected_planet.y - SCREEN_HEIGHT//2 - selected_planet.rad
+        # else:
+        #     move_camera_x = offset_x
+        #     move_camera_y = offset_y
         # Draw the scaled background (no need to scale every time)
-        win.blit(background_handler.get_scaled_image(zoom_level), (0-width_bg, 0-height_bg))
+        win.blit(background_handler.get_scaled_image(zoom_level), (-move_camera_x, -move_camera_y))
 
-        if selected_planet and planetClicked:
-            pygame.draw.line(win, WHITE, (selected_planet.adjusted_x - offset_x, selected_planet.adjusted_y - offset_y), mouse_pos, 2)
+        if selected_planet and desc_checkbox.checked:
+            pygame.draw.line(win, WHITE, (selected_planet.adjusted_x - move_camera_x, selected_planet.adjusted_y - move_camera_y), mouse_pos, 2)
 
 
         for obj in objects:
-            obj.draw(zoom_level, offset_x, offset_y)
+            obj.draw(zoom_level, move_camera_x, move_camera_y)
             obj.move(sun)
 
             # obj.x += obj.vel_x * speed_multiplier  # Apply speed multiplier to velocity
@@ -196,7 +230,7 @@ def main():
             if off_screen or collided_sun:
                 objects.remove(obj)
 
-        sun.draw(zoom_level, offset_x, offset_y)
+        sun.draw(zoom_level, move_camera_x, move_camera_y)
 
         draw_UI_Checkboxes(allTogglable)
 

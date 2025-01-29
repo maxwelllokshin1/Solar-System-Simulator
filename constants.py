@@ -3,7 +3,7 @@ import pygame
 pygame.init() #start the pygame
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 1400, 900 # window to be playing on
-WIDTH, HEIGHT = 1400*10, 900*10 # actual size of simulation
+WIDTH, HEIGHT = 1400*5, 900*5 # actual size of simulation
 
 # Set mass of all planets
 MERCURY_MASS = 10 

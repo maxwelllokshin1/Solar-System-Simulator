@@ -16,12 +16,13 @@ class SUN:
         self.y = y
         self.mass = mass
         self.img = img
+        self.rad = SUN_RADIUS
     
     # Draw the sun with attributes zoom_level, offset_x, offset_y
     def draw(self, zoom_level, offset_x, offset_y):
-        rad = SUN_RADIUS * zoom_level   # How big the sun will be based on the zoom level
-        img = pygame.transform.scale(self.img, (rad * 2, rad * 2)) # Scale the image based on zoom
-        win.blit(img, (self.x - rad- offset_x, self.y - rad - offset_y)) # Draw the image at center of screen
+        self.rad = SUN_RADIUS * zoom_level   # How big the sun will be based on the zoom level
+        img = pygame.transform.scale(self.img, (self.rad * 2, self.rad * 2)) # Scale the image based on zoom
+        win.blit(img, (self.x - self.rad- offset_x, self.y - self.rad - offset_y)) # Draw the image at center of screen
 
 
 # Create PLANET class
@@ -72,10 +73,11 @@ class PLANET:
         self.rad = PLANET_RADIUS * zoom_level 
 
         # all text stuff
-        fontSize = math.floor(16 * zoom_level) # font size based on zoom level
-        font = pygame.font.SysFont("Comic-Sans", fontSize) # font style
-        text = font.render(self.name, True, WHITE)  # how the text should look
-        win.blit(text, text.get_rect(center=(self.adjusted_x - offset_x,self.adjusted_y - self.rad - 10 - offset_y)))  # pasting the text on the planets
+        if self.hoverPlanet:
+            fontSize = math.floor(16 * zoom_level) # font size based on zoom level
+            font = pygame.font.SysFont("Comic-Sans", fontSize) # font style
+            text = font.render(self.name, True, WHITE)  # how the text should look
+            win.blit(text, text.get_rect(center=(self.adjusted_x - offset_x,self.adjusted_y - self.rad - 10 - offset_y)))  # pasting the text on the planets
 
         # create the planet image based on radius
         img = pygame.transform.scale(self.img, (self.rad*2, self.rad*2)) 
