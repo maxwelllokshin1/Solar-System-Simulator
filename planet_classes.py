@@ -17,12 +17,18 @@ class SUN:
         self.mass = mass
         self.img = img
         self.rad = SUN_RADIUS
+        self.adjusted_x = 0
+        self.adjusted_y = 0
+
     
     # Draw the sun with attributes zoom_level, offset_x, offset_y
-    def draw(self, zoom_level, offset_x, offset_y):
+    def draw(self, zoom_level, offset_x, offset_y, bgWidth, bgHeight):
+        self.adjusted_x = (self.x - bgWidth//2) * (zoom_level/10) + bgWidth // 2 
+        self.adjusted_y = (self.y - bgHeight//2) * (zoom_level/10) + bgHeight // 2
+
         self.rad = SUN_RADIUS * zoom_level   # How big the sun will be based on the zoom level
         img = pygame.transform.scale(self.img, (self.rad * 2, self.rad * 2)) # Scale the image based on zoom
-        win.blit(img, (self.x - self.rad- offset_x, self.y - self.rad - offset_y)) # Draw the image at center of screen
+        win.blit(img, (self.adjusted_x - self.rad- offset_x, self.adjusted_y - self.rad - offset_y)) # Draw the image at center of screen
 
 
 # Create PLANET class
@@ -64,10 +70,10 @@ class PLANET:
     
 
     # Draw the planet 
-    def draw(self, zoom_level, offset_x, offset_y):
+    def draw(self, zoom_level, offset_x, offset_y, bgWidth, bgHeight):
         # change the position based on the zoom
-        self.adjusted_x = (self.x - WIDTH//2) * (zoom_level/10) + WIDTH // 2 
-        self.adjusted_y = (self.y - HEIGHT//2) * (zoom_level/10) + HEIGHT // 2
+        self.adjusted_x = (self.x - bgWidth//2) * (zoom_level/10) + bgWidth // 2 
+        self.adjusted_y = (self.y - bgHeight//2) * (zoom_level/10) + bgHeight // 2
 
         # change the radius based on zoom
         self.rad = PLANET_RADIUS * zoom_level 
