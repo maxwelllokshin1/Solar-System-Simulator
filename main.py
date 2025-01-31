@@ -9,7 +9,6 @@ pygame.init() #start the pygame
 win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) # create game screen
 pygame.display.set_caption("Solar System Sim") # name title
 
-
 def main():
 
     background_handler = ScaledBackground(BG, max_zoom_level=20)
@@ -67,9 +66,6 @@ def main():
     # The zoom
     zoom_level = 10.0
 
-    # Last mouse position
-    last_mouse_pos = None
-
     # IN PROCESS
     fps_multiplier = 1
 
@@ -85,152 +81,166 @@ def main():
     offset_x = (WIDTH - SCREEN_WIDTH) //2
     offset_y = (HEIGHT - SCREEN_HEIGHT) //2
 
+    move_camera_x = offset_x/10* (int(zoom_level))
+    move_camera_y = offset_y/10* (int(zoom_level))
+
+    updateVal = 0
+
+    mouseImg = pygame.transform.scale(pygame.image.load("mouse.png"), (25, 25)) # Scale the image based on zoom
+    pygame.mouse.set_visible(False)
 
 
-    move_camera_x = offset_x
-    move_camera_y = offset_y
-
-     # Run program
+    # Run program
     while running:
         clock.tick(FPS) # Run based on FPS
+        updateVal+=1
+        if updateVal > 1:
+            updateVal = 0
 
-        mouse_pos = pygame.mouse.get_pos()  # get the mouse position
+            mouse_pos = pygame.mouse.get_pos()  # get the mouse position
 
-        scaled_bg = background_handler.get_scaled_image(zoom_level)
-        bg_x = -move_camera_x * 0.5
-        bg_y = -move_camera_y * 0.5
+            scaled_bg = background_handler.get_scaled_image(zoom_level)
+            bg_x = -move_camera_x * 0.5
+            bg_y = -move_camera_y * 0.5
 
-        win.blit(scaled_bg, (bg_x, bg_y))
+            # move_camera_x = (offset_x/10)* (int(zoom_level))
+            # move_camera_y = (offset_y/10) * (int(zoom_level))
+            print((move_camera_x,move_camera_y))
 
-        move_camera_x = SCREEN_WIDTH + (SCREEN_WIDTH/10)*zoom_level
-        move_camera_y = SCREEN_HEIGHT + (SCREEN_HEIGHT/10)*zoom_level
+            win.blit(scaled_bg, (bg_x, bg_y))
 
-        print((move_camera_x, move_camera_y))
+            # move_camera_x = SCREEN_WIDTH + (SCREEN_WIDTH/10)*zoom_level
+            # move_camera_y = SCREEN_HEIGHT + (SCREEN_HEIGHT/10)*zoom_level
 
-        if keyboard.is_pressed('down'):
-            dx = 0
-            dy = 10
-        elif keyboard.is_pressed('up'):
-            dx = 0
-            dy = -10
-        elif keyboard.is_pressed('left'):
-            dx = -10
-            dy = 0
-        elif keyboard.is_pressed('right'):
-            dx = 10
-            dy = 0
-        else:
-            dx = 0
-            dy = 0
-        
-        move_camera_x += dx 
-        move_camera_y += dy 
+            # print((move_camera_x, move_camera_y))
 
-
-        if not camera_follow:
-            move_camera_x = max(SCREEN_WIDTH, min(move_camera_x, scaled_bg.get_width() - SCREEN_WIDTH))
-            move_camera_y = max(SCREEN_HEIGHT, min(move_camera_y, scaled_bg.get_height() - SCREEN_HEIGHT))
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-            if event.type == pygame.MOUSEBUTTONUP:
-                moveScreen = False
-                last_mouse_pos = None
-
-            if event.type == pygame.MOUSEMOTION:
-                for obj in objects:
-                    obj.handle_hover(mouse_pos, move_camera_x, move_camera_y)
-
-                if not sliderList_checkbox.checked:
-                    for sliders in allSliders:
-                        sliders.handle_hover(mouse_pos)
-                        if sliders.toggleSlider:
-                            sliders.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                            deltaSlider = max(1, (sliders.pos / sliderWidth) * sliders.deltaAmnt)
-                            sliders.changingVal = int(deltaSlider)
-                            match sliders.name:
-                                case "SUN MASS":
-                                    sun.mass = deltaSlider
-                                case "ZOOM IN/OUT":
-                                    zoom_level = deltaSlider
-                                case "SPEED UP/ SLOW DOWN":
-                                    fps_multiplier = deltaSlider
+            if keyboard.is_pressed('s'):
+                dx = 0
+                dy = 10
+            elif keyboard.is_pressed('w'):
+                dx = 0
+                dy = -10
+            elif keyboard.is_pressed('a'):
+                dx = -10
+                dy = 0
+            elif keyboard.is_pressed('d'):
+                dx = 10
+                dy = 0
+            else:
+                dx = 0
+                dy = 0
+            
+            move_camera_x += dx 
+            move_camera_y += dy 
 
 
-                # if sunSlider:
-                #     sunMass.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                #     sun.mass = (sunMass.pos / sliderWidth) * 1000  
-                #     sunMass.changingVal = int(sun.mass)
-                # if zoomSlider:
-                #     zoom.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                #     zoom_level = (zoom.pos / sliderWidth) * 10
-                #     zoom.changingVal = int(zoom_level)
-                # if speedUpSlider:
-                #     speedUp.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                #     fps_multiplier = (speedUp.pos / sliderWidth) * 1000
-                #     speedUp.changingVal = int(fps_multiplier)
-                    # adjusted_fps = int(FPS * fps_multiplier)  # Adjust FPS based on multiplier
-                    # clock.tick(adjusted_fps)
-                    # sun.mass = SUN_MASS * speed_multiplier
+            if not camera_follow:
+                move_camera_x = max(SCREEN_WIDTH, min(move_camera_x, WIDTH - SCREEN_WIDTH))
+                move_camera_y = max(SCREEN_HEIGHT, min(move_camera_y, HEIGHT - SCREEN_HEIGHT))
 
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    desc_checkbox.handle_click(mouse_pos)
-                    sliderList_checkbox.handle_click(mouse_pos)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    moveScreen = False
+                    last_mouse_pos = None
+
+                if event.type == pygame.MOUSEMOTION:
+                    for obj in objects:
+                        obj.handle_hover(mouse_pos, move_camera_x, move_camera_y)
+
                     if not sliderList_checkbox.checked:
                         for sliders in allSliders:
-                            sliders.handle_click(mouse_pos)
+                            sliders.handle_hover(mouse_pos)
+                            if sliders.toggleSlider:
+                                sliders.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
+                                deltaSlider = max(0, (sliders.pos / sliderWidth) * sliders.deltaAmnt)
+                                sliders.changingVal = int(deltaSlider)
+                                match sliders.name:
+                                    case "SUN MASS":
+                                        sun.mass = deltaSlider
+                                    case "ZOOM IN/OUT":
+                                        zoom_level = deltaSlider
+                                    case "SPEED UP/ SLOW DOWN":
+                                        fps_multiplier = deltaSlider
 
-                if 0 <= mouse_pos[0] <= SCREEN_WIDTH and 0 <= mouse_pos[0] <= SCREEN_HEIGHT:
-                    moveScreen = True
-                    last_mouse_pos = mouse_pos
 
+                    # if sunSlider:
+                    #     sunMass.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
+                    #     sun.mass = (sunMass.pos / sliderWidth) * 1000  
+                    #     sunMass.changingVal = int(sun.mass)
+                    # if zoomSlider:
+                    #     zoom.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
+                    #     zoom_level = (zoom.pos / sliderWidth) * 10
+                    #     zoom.changingVal = int(zoom_level)
+                    # if speedUpSlider:
+                    #     speedUp.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
+                    #     fps_multiplier = (speedUp.pos / sliderWidth) * 1000
+                    #     speedUp.changingVal = int(fps_multiplier)
+                        # adjusted_fps = int(FPS * fps_multiplier)  # Adjust FPS based on multiplier
+                        # clock.tick(adjusted_fps)
+                        # sun.mass = SUN_MASS * speed_multiplier
+
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        desc_checkbox.handle_click(mouse_pos)
+                        sliderList_checkbox.handle_click(mouse_pos)
+                        if not sliderList_checkbox.checked:
+                            for sliders in allSliders:
+                                sliders.handle_click(mouse_pos)
+
+                    if 0 <= mouse_pos[0] <= SCREEN_WIDTH and 0 <= mouse_pos[0] <= SCREEN_HEIGHT:
+                        moveScreen = True
+                        last_mouse_pos = mouse_pos
+
+                    
+                    if not selected_planet:
+                        for obj in objects:
+                            if math.sqrt((mouse_pos[0] + move_camera_x - obj.adjusted_x)**2 + ((mouse_pos[1] + move_camera_y) - obj.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level):
+                                selected_planet = obj
+                                planetClicked = True
+                                camera_follow = True
+                                break
+                    elif selected_planet and desc_checkbox.checked:
+                        selected_planet = movePlanet((selected_planet.x, selected_planet.y), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
+                        selected_planet = None
+                    elif selected_planet and math.sqrt((mouse_pos[0] + move_camera_x - selected_planet.adjusted_x)**2 + ((mouse_pos[1] + move_camera_y) - selected_planet.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level) and camera_follow:
+                        camera_follow = False
+                        selected_planet = None
+
+            if camera_follow and selected_planet and not desc_checkbox.checked:
+                move_camera_x = selected_planet.x - SCREEN_WIDTH//2 - selected_planet.rad
+                move_camera_y = selected_planet.y - SCREEN_HEIGHT//2 - selected_planet.rad
+
+            if selected_planet and desc_checkbox.checked:
+                pygame.draw.line(win, WHITE, (selected_planet.adjusted_x - move_camera_x, selected_planet.adjusted_y - move_camera_y), mouse_pos, 2)
+
+
+            for obj in objects:
+                obj.draw(zoom_level, move_camera_x, move_camera_y, scaled_bg.get_width(), scaled_bg.get_height())
+                obj.move(sun)
+
+                off_screen = False # obj.x < 0 or obj.x > WIDTH or obj.y < 0 or obj.y > HEIGHT
+                collided_sun = math.sqrt((obj.x - sun.x)**2 + (obj.y - sun.y)**2) <= SUN_RADIUS*zoom_level
                 
-                if not selected_planet:
-                    for obj in objects:
-                        if math.sqrt((mouse_pos[0] + move_camera_x - obj.adjusted_x)**2 + ((mouse_pos[1] + move_camera_y) - obj.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level):
-                            selected_planet = obj
-                            planetClicked = True
-                            camera_follow = True
-                            break
-                elif selected_planet and desc_checkbox.checked:
-                    selected_planet = movePlanet((selected_planet.x, selected_planet.y), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
-                    selected_planet = None
-                elif selected_planet and math.sqrt((mouse_pos[0] + move_camera_x - selected_planet.adjusted_x)**2 + ((mouse_pos[1] + move_camera_y) - selected_planet.adjusted_y)**2) <= PLANET_RADIUS*(2*zoom_level) and camera_follow:
-                    camera_follow = False
-                    selected_planet = None
+                if off_screen or collided_sun:
+                    objects.remove(obj)
 
-        if camera_follow and selected_planet and not desc_checkbox.checked:
-            move_camera_x = selected_planet.x - SCREEN_WIDTH//2 - selected_planet.rad
-            move_camera_y = selected_planet.y - SCREEN_HEIGHT//2 - selected_planet.rad
+            sun.draw(zoom_level, move_camera_x, move_camera_y, scaled_bg.get_width(), scaled_bg.get_height())
 
-        if selected_planet and desc_checkbox.checked:
-            pygame.draw.line(win, WHITE, (selected_planet.adjusted_x - move_camera_x, selected_planet.adjusted_y - move_camera_y), mouse_pos, 2)
+            draw_UI_Checkboxes(allTogglable)
 
+            if not sliderList_checkbox.checked:
+                draw_UI_Sliders(allSliders)
 
-        for obj in objects:
-            obj.draw(zoom_level, move_camera_x, move_camera_y, scaled_bg.get_width(), scaled_bg.get_height())
-            obj.move(sun)
+            win.blit(mouseImg, (mouse_pos[0], mouse_pos[1]))
 
-            off_screen = False # obj.x < 0 or obj.x > WIDTH or obj.y < 0 or obj.y > HEIGHT
-            collided_sun = math.sqrt((obj.x - sun.x)**2 + (obj.y - sun.y)**2) <= SUN_RADIUS*zoom_level
-            
-            if off_screen or collided_sun:
-                objects.remove(obj)
-
-        sun.draw(zoom_level, move_camera_x, move_camera_y, scaled_bg.get_width(), scaled_bg.get_height())
-
-        draw_UI_Checkboxes(allTogglable)
-
-        if not sliderList_checkbox.checked:
-            draw_UI_Sliders(allSliders)
-
-        pygame.display.update()
+            pygame.display.update()
 
     pygame.quit()
 
 if __name__ == "__main__":
+
     main()

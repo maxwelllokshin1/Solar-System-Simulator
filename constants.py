@@ -21,7 +21,7 @@ PLANET_RADIUS = 5
 SUN_RADIUS = 10
 
 # set FPS
-FPS = 60
+FPS = 240
 
 # set gravity
 GRAVITY = 10
