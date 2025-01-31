@@ -4,6 +4,15 @@
 - Here I will start to show my true pation in computer science and coding through my skills
 - I Developed some interactive UI for the player
 
+# MUST DO!!!!!
+```sh
+pip install pygame
+```
+
+```sh
+pip install keyboard
+```
+
 # VERSION 1.0.0
 - Toggle options
 - Sliders: Sun Mass, zoom_level, speed(work in progress)
