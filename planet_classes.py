@@ -22,20 +22,20 @@ class SUN:
 
     
     # Draw the sun with attributes zoom_level, offset_x, offset_y
-    def draw(self, zoom_level, offset_x, offset_y, bgWidth, bgHeight):
-        self.adjusted_x = (self.x - bgWidth//2) * (zoom_level/10) + bgWidth // 2 
-        self.adjusted_y = (self.y - bgHeight//2) * (zoom_level/10) + bgHeight // 2
+    def draw(self, zoom_level, offset_x, offset_y):
+        # self.adjusted_x = (self.x - bgWidth//2) * (zoom_level/10) + bgWidth // 2 
+        # self.adjusted_y = (self.y - bgHeight//2) * (zoom_level/10) + bgHeight // 2
 
         self.rad = SUN_RADIUS * zoom_level   # How big the sun will be based on the zoom level
         img = pygame.transform.scale(self.img, (self.rad * 2, self.rad * 2)) # Scale the image based on zoom
-        win.blit(img, (self.adjusted_x - self.rad- offset_x, self.adjusted_y - self.rad - offset_y)) # Draw the image at center of screen
-        # win.blit(img, (self.x - self.rad- offset_x, self.y - self.rad - offset_y)) # Draw the image at center of screen
+        # win.blit(img, (self.adjusted_x - self.rad- offset_x, self.adjusted_y - self.rad - offset_y)) # Draw the image at center of screen
+        win.blit(img, (self.x - self.rad- offset_x, self.y - self.rad - offset_y)) # Draw the image at center of screen
 
 
 # Create PLANET class
 class PLANET:
     # Define all attributes x, y, vel_x, vel_y, mass, name, img
-    def __init__(self, x, y, vel_x, vel_y, mass, name, img, adjusted_x, adjusted_y):
+    def __init__(self, x, y, vel_x, vel_y, mass, name, img):
         self.x = x
         self.y = y
         self.vel_x = vel_x
@@ -43,8 +43,8 @@ class PLANET:
         self.mass = mass
         self.name = name
         self.img = img
-        self.adjusted_x = adjusted_x
-        self.adjusted_y = adjusted_y
+        self.cameraX = 0
+        self.cameraY = 0
         self.hoverPlanet = False
         self.rad = PLANET_RADIUS
     
@@ -71,10 +71,10 @@ class PLANET:
     
 
     # Draw the planet 
-    def draw(self, zoom_level, offset_x, offset_y, bgWidth, bgHeight):
+    def draw(self, zoom_level, offset_x, offset_y):
         # change the position based on the zoom
-        self.adjusted_x = (self.x - WIDTH//2) * (zoom_level/10) + WIDTH // 2 
-        self.adjusted_y = (self.y - HEIGHT//2) * (zoom_level/10) + HEIGHT // 2
+        self.cameraX = (self.x - WIDTH//2) * (zoom_level/10) + WIDTH // 2 
+        self.cameraY = (self.y - HEIGHT//2) * (zoom_level/10) + HEIGHT // 2
 
         # change the radius based on zoom
         self.rad = PLANET_RADIUS * zoom_level 
@@ -84,17 +84,17 @@ class PLANET:
             fontSize = math.floor(16 * zoom_level) # font size based on zoom level
             font = pygame.font.SysFont("Comic-Sans", fontSize) # font style
             text = font.render(self.name, True, WHITE)  # how the text should look
-            win.blit(text, text.get_rect(center=(self.adjusted_x - offset_x,self.adjusted_y - self.rad - 10 - offset_y)))  # pasting the text on the planets
+            win.blit(text, text.get_rect(center=(self.cameraX - offset_x,self.cameraY - self.rad - 10 - offset_y)))  # pasting the text on the planets
 
         # create the planet image based on radius
         img = pygame.transform.scale(self.img, (self.rad*2, self.rad*2)) 
-        win.blit(img, (self.adjusted_x - self.rad - offset_x, self.adjusted_y - self.rad - offset_y)) # draw planet image
+        win.blit(img, (self.cameraX - self.rad - offset_x, self.cameraY - self.rad - offset_y)) # draw planet image
         if self.hoverPlanet:
-            pygame.draw.circle(win, (255,255,255), (self.adjusted_x - offset_x, self.adjusted_y - offset_y), self.rad, 5)
+            pygame.draw.circle(win, (255,255,255), (self.cameraX - offset_x, self.cameraY - offset_y), self.rad, 5)
         
     
     def handle_hover(self, mouse_pos, offset_x, offset_y):
-        if math.sqrt((mouse_pos[0] + offset_x - self.adjusted_x)**2 + ((mouse_pos[1] + offset_y) - self.adjusted_y)**2) <= self.rad:
+        if math.sqrt((mouse_pos[0] + offset_x - self.cameraX)**2 + ((mouse_pos[1] + offset_y) - self.cameraY)**2) <= self.rad:
             # print("HERE TURE")
             self.hoverPlanet = True
         else:
