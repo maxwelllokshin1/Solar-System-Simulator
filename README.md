@@ -12,6 +12,10 @@ pip install pygame
 ```sh
 pip install keyboard
 ```
+TO RUN MAIN FILE:
+```sh
+python main.py
+```
 
 # VERSION 1.0.0
 - Toggle options
