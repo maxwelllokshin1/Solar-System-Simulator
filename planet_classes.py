@@ -35,14 +35,15 @@ class SUN:
 # Create PLANET class
 class PLANET:
     # Define all attributes x, y, vel_x, vel_y, mass, name, img
-    def __init__(self, x, y, vel_x, vel_y, mass, name, img):
-        self.x = x
+    def __init__(self, x, y, vel_x, vel_y, mass, name):
+        self.x = (WIDTH // 2) - x
         self.y = y
-        self.vel_x = vel_x
-        self.vel_y = vel_y
+        self.vel_x = vel_x/VELOCITY_SCALE
+        self.vel_y = vel_y/VELOCITY_SCALE
         self.mass = mass
-        self.name = name
-        self.img = img
+        self.name = name.title()
+        name+=".png"
+        self.img = pygame.image.load(name)
         self.cameraX = 0
         self.cameraY = 0
         self.hoverPlanet = False

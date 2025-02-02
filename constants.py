@@ -42,11 +42,24 @@ CYAN = (0, 255, 255)
 # IMAGES FOR ALL PLANETS, SUN, AND BACKGROUND
 BG = pygame.image.load("background.jpg")
 sun_pic = pygame.image.load("sun.png")
-mercury_pic = pygame.image.load("mercury.png")
-venus_pic = pygame.image.load("venus.png")
-earth_pic = pygame.image.load("earth.png")
-mars_pic = pygame.image.load("mars.png")
-jupiter_pic = pygame.image.load("jupiter.png")
-saturn_pic = pygame.image.load("saturn.png")
-urnaus_pic = pygame.image.load("uanus.png")
-neptune_pic = pygame.image.load("neptune.png")
+
+
+# All planets distances relative to the sun
+mercury_distance = 57.91  
+venus_distance = 108.2   
+earth_distance = 149.6   
+mars_distance = 227.9  
+jupiter_distance = 778.3   
+saturn_distance = 1429   
+uranus_distance = 2871   
+neptune_distance = 4495  
+
+# All Planets Velocities
+mercury_velocity = 478.7 
+venus_velocity = 350.2   
+earth_velocity = 297.8   
+mars_velocity = 240.77   
+jupiter_velocity = 130.7 
+saturn_velocity = 150 # 969   
+uranus_velocity = 130 # 681   
+neptune_velocity = 110 # 543 

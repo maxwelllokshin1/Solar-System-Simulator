@@ -48,38 +48,18 @@ def main():
     desc_checkbox = CHECKBOX(checkboxX,checkbox_size,"Toggle Planet Descriptions")
     sliderList_checkbox = CHECKBOX(checkboxX,checkbox_size,"Toggle sliders")
 
-    allTogglable = [desc_checkbox, sliderList_checkbox]
-   
-    # All planets distances relative to the sun
-    mercury_distance = 57.91  
-    venus_distance = 108.2   
-    earth_distance = 149.6   
-    mars_distance = 227.9  
-    jupiter_distance = 778.3   
-    saturn_distance = 1429   
-    uranus_distance = 2871   
-    neptune_distance = 4495  
-
-    # All Planets Velocities
-    mercury_velocity = 478.7 
-    venus_velocity = 350.2   
-    earth_velocity = 297.8   
-    mars_velocity = 240.77   
-    jupiter_velocity = 130.7 
-    saturn_velocity = 150 # 969   
-    uranus_velocity = 130 # 681   
-    neptune_velocity = 110 # 543   
+    allTogglable = [desc_checkbox, sliderList_checkbox]  
 
     # Create Sun and Planets
     sun = SUN(WIDTH // 2, HEIGHT // 2, SUN_MASS, sun_pic)
-    Mercury = PLANET(WIDTH // 2 - mercury_distance, HEIGHT // 2, 0, mercury_velocity/VELOCITY_SCALE, MERCURY_MASS, "Mercury", mercury_pic)
-    Venus = PLANET(WIDTH // 2 - venus_distance, HEIGHT // 2, 0, venus_velocity/VELOCITY_SCALE, VENUS_MASS, "Venus", venus_pic)
-    Earth = PLANET(WIDTH // 2 - earth_distance, HEIGHT // 2, 0, earth_velocity/VELOCITY_SCALE, EARTH_MASS, "Earth", earth_pic)
-    Mars = PLANET(WIDTH // 2 - mars_distance, HEIGHT // 2, 0, mars_velocity/VELOCITY_SCALE, MARS_MASS, "Mars", mars_pic)
-    Jupiter = PLANET(WIDTH // 2 - jupiter_distance, HEIGHT // 2, 0, jupiter_velocity/VELOCITY_SCALE, JUPITER_MASS, "Jupiter", jupiter_pic)
-    Saturn = PLANET(WIDTH // 2 - saturn_distance, HEIGHT // 2, 0, saturn_velocity/VELOCITY_SCALE, SATURN_MASS, "Saturn", saturn_pic)
-    Uranus = PLANET(WIDTH // 2 - uranus_distance, HEIGHT // 2, 0, uranus_velocity/VELOCITY_SCALE, URANUS_MASS, "Uranus", urnaus_pic)
-    Neptune = PLANET(WIDTH // 2 - neptune_distance, HEIGHT // 2, 0, neptune_velocity/VELOCITY_SCALE, NEPTUNE_MASS, "Neptune", neptune_pic)
+    Mercury = PLANET(mercury_distance, HEIGHT // 2, 0, mercury_velocity, MERCURY_MASS, "mercury")
+    Venus = PLANET(venus_distance, HEIGHT // 2, 0, venus_velocity, VENUS_MASS, "venus")
+    Earth = PLANET(earth_distance, HEIGHT // 2, 0, earth_velocity, EARTH_MASS, "earth")
+    Mars = PLANET(mars_distance, HEIGHT // 2, 0, mars_velocity, MARS_MASS, "mars")
+    Jupiter = PLANET(jupiter_distance, HEIGHT // 2, 0, jupiter_velocity, JUPITER_MASS, "jupiter")
+    Saturn = PLANET(saturn_distance, HEIGHT // 2, 0, saturn_velocity, SATURN_MASS, "saturn")
+    Uranus = PLANET(uranus_distance, HEIGHT // 2, 0, uranus_velocity, URANUS_MASS, "uranus")
+    Neptune = PLANET(neptune_distance, HEIGHT // 2, 0, neptune_velocity, NEPTUNE_MASS, "neptune")
 
 
     # Add all planets to array
@@ -118,9 +98,6 @@ def main():
     tempMoveY = 0
 
     hue_shift = 0
-
-    changeColor = 0
-
     # Run program
     while running:
         clock.tick(FPS) # Run based on FPS
@@ -131,30 +108,11 @@ def main():
             mouse_pos = pygame.mouse.get_pos()  # get the mouse position
 
             scaled_bg = background_handler.get_scaled_image(zoom_level)
-            # bg_x = -move_camera_x * 0.5
-            # bg_y = -move_camera_y * 0.5
-
-            # move_camera_x = (offset_x/10)* (int(zoom_level))
-            # move_camera_y = (offset_y/10) * (int(zoom_level))
-            # print((move_camera_x ,move_camera_y ))
-            # print((scaled_bg.get_width(), scaled_bg.get_height()))
 
             bgScalingX = (offset_x*(zoom_level/10) - (offset_x/10) + (tempMoveX/2))
             bgScalingY = (offset_y*(zoom_level/10) - (offset_y/10) + (tempMoveY/2))
-
-            # bgScalingX = min(scaled_bg.get_width() - SCREEN_WIDTH, bgScalingX)
-            # bgScalingY = min(scaled_bg.get_height() - SCREEN_HEIGHT, bgScalingY)
-
             bgScalingX = max(0, min(scaled_bg.get_width() - SCREEN_WIDTH, bgScalingX))
             bgScalingY = max(0, min(scaled_bg.get_height() - SCREEN_HEIGHT, bgScalingY))
-
-            # print((offset_x, offset_y))
-            # print((bgScalingX, bgScalingY))
-
-            # move_camera_x = SCREEN_WIDTH + (SCREEN_WIDTH/10)*zoom_level
-            # move_camera_y = SCREEN_HEIGHT + (SCREEN_HEIGHT/10)*zoom_level
-
-            # print((move_camera_x, move_camera_y))
 
             if keyboard.is_pressed('s'):
                 dx = 0
@@ -171,6 +129,11 @@ def main():
             else:
                 dx = 0
                 dy = 0
+
+            if keyboard.is_pressed('h'):
+                hue_shift = (hue_shift + 10) % 360  # Shift the hue by 10 degrees, wrap around at 360 degrees
+                # Apply the new hue shift to mouseImg
+                change_hue(mouseImg, hue_shift)
             
             move_camera_x += dx 
             move_camera_y += dy 
@@ -185,8 +148,6 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-
-                # if event.type == pygame.MOUSEBUTTONUP:
 
 
                 if event.type == pygame.MOUSEMOTION:
@@ -209,23 +170,6 @@ def main():
                                         fps_multiplier = deltaSlider
 
 
-                    # if sunSlider:
-                    #     sunMass.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                    #     sun.mass = (sunMass.pos / sliderWidth) * 1000  
-                    #     sunMass.changingVal = int(sun.mass)
-                    # if zoomSlider:
-                    #     zoom.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                    #     zoom_level = (zoom.pos / sliderWidth) * 10
-                    #     zoom.changingVal = int(zoom_level)
-                    # if speedUpSlider:
-                    #     speedUp.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
-                    #     fps_multiplier = (speedUp.pos / sliderWidth) * 1000
-                    #     speedUp.changingVal = int(fps_multiplier)
-                        # adjusted_fps = int(FPS * fps_multiplier)  # Adjust FPS based on multiplier
-                        # clock.tick(adjusted_fps)
-                        # sun.mass = SUN_MASS * speed_multiplier
-
-
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         desc_checkbox.handle_click(mouse_pos)
@@ -233,8 +177,6 @@ def main():
                         if not sliderList_checkbox.checked:
                             for sliders in allSliders:
                                 sliders.handle_click(mouse_pos)
-
-                    # if 0 <= mouse_pos[0] <= SCREEN_WIDTH and 0 <= mouse_pos[0] <= SCREEN_HEIGHT:
 
                     
                     if not selected_planet:
@@ -281,15 +223,7 @@ def main():
 
             if not sliderList_checkbox.checked:
                 draw_UI_Sliders(allSliders)
-
-            changeColor += 1
-            if changeColor >20:
-                changeColor = 0
-                hue_shift = (hue_shift + 10) % 360  # Shift the hue by 10 degrees, wrap around at 360 degrees
-                # Apply the new hue shift to mouseImg
-                change_hue(mouseImg, hue_shift)
             win.blit(mouseImg, (mouse_pos[0]-(mouseImg.get_width()/2), mouse_pos[1]-(mouseImg.get_height()/2)))
-            # print(mouse_pos, " " , (mouse_pos[0]-(mouseImg.get_width()/2), mouse_pos[1]-(mouseImg.get_height()/2)))
 
             pygame.display.update()
 
