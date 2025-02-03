@@ -37,6 +37,13 @@ def change_hue(surface, hue_shift):
 
     pixel_array.close()
 
+def scalePosBackground(zoom_level, scaled_bg, tempMoveX, tempMoveY):
+
+    bgScalingX = (offset_x*(zoom_level/10) - (offset_x/10) + (tempMoveX/2))
+    bgScalingY = (offset_y*(zoom_level/10) - (offset_y/10) + (tempMoveY/2))
+    bgScalingX = max(0, min(scaled_bg.get_width() - SCREEN_WIDTH, bgScalingX))
+    bgScalingY = max(0, min(scaled_bg.get_height() - SCREEN_HEIGHT, bgScalingY))
+    return (bgScalingX, bgScalingY)
 
 def main():
 
@@ -45,46 +52,15 @@ def main():
     running = True
     clock = pygame.time.Clock()
 
-    desc_checkbox = CHECKBOX(checkboxX,checkbox_size,"Toggle Planet Descriptions")
-    sliderList_checkbox = CHECKBOX(checkboxX,checkbox_size,"Toggle sliders")
-
-    allTogglable = [desc_checkbox, sliderList_checkbox]  
-
-    # Create Sun and Planets
-    sun = SUN(WIDTH // 2, HEIGHT // 2, SUN_MASS, sun_pic)
-    Mercury = PLANET(mercury_distance, HEIGHT // 2, 0, mercury_velocity, MERCURY_MASS, "mercury")
-    Venus = PLANET(venus_distance, HEIGHT // 2, 0, venus_velocity, VENUS_MASS, "venus")
-    Earth = PLANET(earth_distance, HEIGHT // 2, 0, earth_velocity, EARTH_MASS, "earth")
-    Mars = PLANET(mars_distance, HEIGHT // 2, 0, mars_velocity, MARS_MASS, "mars")
-    Jupiter = PLANET(jupiter_distance, HEIGHT // 2, 0, jupiter_velocity, JUPITER_MASS, "jupiter")
-    Saturn = PLANET(saturn_distance, HEIGHT // 2, 0, saturn_velocity, SATURN_MASS, "saturn")
-    Uranus = PLANET(uranus_distance, HEIGHT // 2, 0, uranus_velocity, URANUS_MASS, "uranus")
-    Neptune = PLANET(neptune_distance, HEIGHT // 2, 0, neptune_velocity, NEPTUNE_MASS, "neptune")
-
-
-    # Add all planets to array
-    objects = [Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune]
-
+    
     selected_planet = None # Current planet selected
     camera_follow = False # Flag to indicate if the camera is following a planet
 
-    # The zoom
+        # The zoom
     zoom_level = 10.0
 
     # IN PROCESS
     fps_multiplier = 1
-
-    # slider (pos, name, multiplier)
-    sunMass = SLIDER(sliderWidth / 10, "SUN MASS", int(sun.mass), 1000)
-    zoom = SLIDER( sliderWidth, "ZOOM IN/OUT", int(zoom_level), 10)
-    speedUp = SLIDER(sliderWidth/5, "SPEED UP/ SLOW DOWN", int(fps_multiplier), 1000)
-
-    allSliders = [sunMass, zoom, speedUp] # slider array
-
-
-    # Since all planets will be located at top left of screen, adjust their offset according to the WIDTH, HEIGHT, and screen
-    offset_x = (WIDTH - SCREEN_WIDTH) //2
-    offset_y = (HEIGHT - SCREEN_HEIGHT) //2
 
     move_camera_x = offset_x # /10* (int(zoom_level))
     move_camera_y = offset_y # /10* (int(zoom_level))
@@ -98,6 +74,41 @@ def main():
     tempMoveY = 0
 
     hue_shift = 0
+
+    desc_checkbox = CHECKBOX(checkboxX,checkbox_size,"Toggle Planet Descriptions")
+    sliderList_checkbox = CHECKBOX(checkboxX,checkbox_size,"Toggle sliders")
+
+    # Create Sun and Planets
+    # sun = SUN(WIDTH // 2, HEIGHT // 2, SUN_MASS, sun_pic)
+    # Mercury = PLANET(mercury_distance, HEIGHT // 2, 0, mercury_velocity, MERCURY_MASS, "Mercury")
+    # Venus = PLANET(venus_distance, HEIGHT // 2, 0, venus_velocity, VENUS_MASS, "Venus")
+    # Earth = PLANET(earth_distance, HEIGHT // 2, 0, earth_velocity, EARTH_MASS, "Earth")
+    # Mars = PLANET(mars_distance, HEIGHT // 2, 0, mars_velocity, MARS_MASS, "Mars")
+    # Jupiter = PLANET(jupiter_distance, HEIGHT // 2, 0, jupiter_velocity, JUPITER_MASS, "Jupiter")
+    # Saturn = PLANET(saturn_distance, HEIGHT // 2, 0, saturn_velocity, SATURN_MASS, "Saturn")
+    # Uranus = PLANET(uranus_distance, HEIGHT // 2, 0, uranus_velocity, URANUS_MASS, "Uranus")
+    # Neptune = PLANET(neptune_distance, HEIGHT // 2, 0, neptune_velocity, NEPTUNE_MASS, "Neptune")
+
+     # Create Sun and Planets
+    sun = SUN(WIDTH // 2, HEIGHT // 2, 1.989, 4, "Sun")#, Sun_info)
+    Mercury = PLANET(mercury_distance, mercury_velocity, 3.30114, 3, "Mercury")#, Mercury_info)
+    Venus = PLANET(venus_distance, venus_velocity, 4.86747, 3, "Venus")#, Venus_info)
+    Earth = PLANET(earth_distance, earth_velocity, 5.97237 , 3, "Earth")#, Earth_info)
+    Mars = PLANET(mars_distance, mars_velocity, 6.41712, 3, "Mars")#, Mars_info)
+    Jupiter = PLANET(jupiter_distance, jupiter_velocity, 1.89819 , 3, "Jupiter")#, Jupiter_info)
+    Saturn = PLANET(saturn_distance, saturn_velocity, 5.68336 , 4, "Saturn")#, Saturn_info)
+    Uranus = PLANET(uranus_distance, uranus_velocity, 8.68127 , 4,"Uranus")#, Uranus_info)
+    Neptune = PLANET(neptune_distance, neptune_velocity, 1.02413, 4, "Neptune")#, Neptune_info)
+
+    # slider (pos, name, multiplier)
+    sunMass = SLIDER(sliderWidth / 10, "SUN MASS", int(sun.mass), 1000)
+    zoom = SLIDER( sliderWidth, "ZOOM IN/OUT", int(zoom_level), 10)
+    speedUp = SLIDER(sliderWidth/5, "SPEED UP/ SLOW DOWN", int(fps_multiplier), 1000)
+
+    objects = [Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune]# Add all planets to array
+    allTogglable = [desc_checkbox, sliderList_checkbox]  #checkbox array
+    allSliders = [sunMass, zoom, speedUp] # slider array
+
     # Run program
     while running:
         clock.tick(FPS) # Run based on FPS
@@ -108,11 +119,10 @@ def main():
             mouse_pos = pygame.mouse.get_pos()  # get the mouse position
 
             scaled_bg = background_handler.get_scaled_image(zoom_level)
+            bgPositioning = scalePosBackground(zoom_level, scaled_bg, tempMoveX, tempMoveY)
 
-            bgScalingX = (offset_x*(zoom_level/10) - (offset_x/10) + (tempMoveX/2))
-            bgScalingY = (offset_y*(zoom_level/10) - (offset_y/10) + (tempMoveY/2))
-            bgScalingX = max(0, min(scaled_bg.get_width() - SCREEN_WIDTH, bgScalingX))
-            bgScalingY = max(0, min(scaled_bg.get_height() - SCREEN_HEIGHT, bgScalingY))
+
+
 
             if keyboard.is_pressed('s'):
                 dx = 0
@@ -140,7 +150,7 @@ def main():
             tempMoveX += dx
             tempMoveY += dy
 
-
+            #TODO
             if not camera_follow:
                 move_camera_x = max(0, min(move_camera_x, WIDTH - SCREEN_WIDTH))
                 move_camera_y = max(0, min(move_camera_y, HEIGHT - SCREEN_HEIGHT))
@@ -178,20 +188,25 @@ def main():
                             for sliders in allSliders:
                                 sliders.handle_click(mouse_pos)
 
-                    
-                    if not selected_planet:
+                    clickOnPlanet = False
+                    if selected_planet:
+                        clickOnPlanet = math.sqrt((mouse_pos[0] + move_camera_x - selected_planet.cameraX)**2 + ((mouse_pos[1] + move_camera_y) - selected_planet.cameraY)**2) <= PLANET_RADIUS*(2*zoom_level)
+
+                    if not selected_planet: #check if clicked on planet
                         for obj in objects:
                             if math.sqrt((mouse_pos[0] + move_camera_x - obj.cameraX)**2 + ((mouse_pos[1] + move_camera_y) - obj.cameraY)**2) <= PLANET_RADIUS*(2*zoom_level):
                                 selected_planet = obj
                                 camera_follow = True
                                 break
-                    elif selected_planet and desc_checkbox.checked:
+                    elif selected_planet and desc_checkbox.checked: # check if moving the planet is allowed
                         selected_planet = movePlanet((selected_planet.x, selected_planet.y), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
                         selected_planet = None
-                    elif selected_planet and math.sqrt((mouse_pos[0] + move_camera_x - selected_planet.cameraX)**2 + ((mouse_pos[1] + move_camera_y) - selected_planet.cameraY)**2) <= PLANET_RADIUS*(2*zoom_level) and camera_follow:
+                    elif selected_planet and clickOnPlanet and camera_follow: # check if already following planet so once clicked move away
                         camera_follow = False
                         selected_planet = None
 
+
+            #TODO
             if camera_follow and selected_planet and not desc_checkbox.checked:
                 move_camera_x = selected_planet.x - SCREEN_WIDTH//2 - selected_planet.rad
                 move_camera_y = selected_planet.y - SCREEN_HEIGHT//2 - selected_planet.rad
@@ -201,9 +216,9 @@ def main():
 
 
 
-            win.blit(scaled_bg, (-bgScalingX , -bgScalingY ))
+            win.blit(scaled_bg, (-bgPositioning[0] , -bgPositioning[1]))
 
-            if selected_planet and desc_checkbox.checked:
+            if selected_planet and desc_checkbox.checked: # create trajectory line
                 pygame.draw.line(win, WHITE, (selected_planet.cameraX - move_camera_x, selected_planet.cameraY - move_camera_y), mouse_pos, 2)
 
 
