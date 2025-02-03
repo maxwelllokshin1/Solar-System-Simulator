@@ -67,7 +67,7 @@ def main():
 
     updateVal = 0
 
-    mouseImg = pygame.transform.scale(pygame.image.load("mouse.png"), (50, 50)) # Scale the image based on zoom
+    mouseImg = pygame.transform.rotate(pygame.transform.scale(pygame.image.load("mouse.png"), (25, 25)), 45) # Scale the image based on zoom
     pygame.mouse.set_visible(False)
 
     tempMoveX = 0
