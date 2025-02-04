@@ -50,20 +50,20 @@ class PLANET:
         cur_info = get_info(name)
 
         angle = (cur_info['mainAnomaly'] / cur_info['sideralOrbit']) * 360
-        self.x = (WIDTH // 2) + ((displacement/DISTANCE_SCALE)*math.cos(angle))
-        self.y = (HEIGHT // 2) + ((displacement/DISTANCE_SCALE)*math.sin(angle))
+        self.x =  WIDTH//2 + ((displacement/DISTANCE_SCALE)*math.cos(math.radians(angle)))
+        self.y =  HEIGHT//2 - ((displacement/DISTANCE_SCALE)*math.sin(math.radians(angle)))
 
-        self.vel_x = ((velocity/VELOCITY_SCALE)*math.sin(angle))
-        self.vel_y = ((velocity/VELOCITY_SCALE)*math.cos(angle))
+        self.vel_x = ((velocity/VELOCITY_SCALE)*math.cos(math.radians(angle)))
+        self.vel_y = ((velocity/VELOCITY_SCALE)*math.sin(math.radians(angle)))
 
-        if(self.vel_x < 0 and self.vel_y > 0):
-            self.vel_y = -self.vel_y
-            self.vel_x = abs(self.vel_x)
-        elif(self.vel_x > 0 and self.vel_y < 0):
-            self.vel_x = -self.vel_x
-            self.vel_y = abs(self.vel_y)
+        # if(self.vel_x < 0 and self.vel_y > 0):
+        #     self.vel_y = -self.vel_y
+        #     self.vel_x = abs(self.vel_x)
+        # elif(self.vel_x > 0 and self.vel_y < 0):
+        #     self.vel_x = -self.vel_x
+        #     self.vel_y = abs(self.vel_y)
 
-        print(f"{name}: ", (self.vel_x, self.vel_y))
+        print(f"{name}: ", (cur_info['mainAnomaly'], cur_info['sideralOrbit']), (self.vel_x, self.vel_y), angle, (self.x, self.y), (WIDTH//2, HEIGHT//2), (math.cos(math.radians(angle)), math.sin(math.radians(angle))))
         # self.vel_x = vel_x/VELOCITY_SCALE
         # self.vel_y = vel_y/VELOCITY_SCALE
         self.mass = mass * (10 ** massScale)
@@ -100,7 +100,7 @@ class PLANET:
 
     # Draw the planet 
     def draw(self, zoom_level, offset_x, offset_y):
-        # change the position based on the zoom
+        # change the position based on the zoomdawas
         self.cameraX = (self.x - WIDTH//2) * (zoom_level/10) + WIDTH // 2 
         self.cameraY = (self.y - HEIGHT//2) * (zoom_level/10) + HEIGHT // 2
 
@@ -119,7 +119,9 @@ class PLANET:
         win.blit(img, (self.cameraX - self.rad - offset_x, self.cameraY - self.rad - offset_y)) # draw planet image
         if self.hoverPlanet:
             pygame.draw.circle(win, (255,255,255), (self.cameraX - offset_x, self.cameraY - offset_y), self.rad, 5)
-        
+
+        pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x + (self.vel_x*10), self.cameraY - offset_y), 2) 
+        pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x, self.cameraY - offset_y + (self.vel_y*10)), 2)        
     
     def handle_hover(self, mouse_pos, offset_x, offset_y):
         if math.sqrt((mouse_pos[0] + offset_x - self.cameraX)**2 + ((mouse_pos[1] + offset_y) - self.cameraY)**2) <= self.rad:

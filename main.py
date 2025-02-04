@@ -224,7 +224,7 @@ def main():
 
             for obj in objects:
                 obj.draw(zoom_level, move_camera_x, move_camera_y)
-                obj.move(sun)
+                # obj.move(sun)
 
                 off_screen = False # obj.x < 0 or obj.x > WIDTH or obj.y < 0 or obj.y > HEIGHT
                 collided_sun = math.sqrt((obj.x - sun.x)**2 + (obj.y - sun.y)**2) <= SUN_RADIUS*(zoom_level/10)
