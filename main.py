@@ -1,6 +1,9 @@
 import pygame
 import math
 import keyboard
+import random
+import sys
+import time
 from constants import *
 from planet_classes import *
 from background import *
@@ -45,6 +48,15 @@ def scalePosBackground(zoom_level, scaled_bg, tempMoveX, tempMoveY):
     bgScalingY = max(0, min(scaled_bg.get_height() - SCREEN_HEIGHT, bgScalingY))
     return (bgScalingX, bgScalingY)
 
+def progress_bar(percentage):
+    percentage/=8
+    percentage *= 100
+    bar_length = 50
+    block = int(bar_length * (percentage / 100))
+    progress = f"\r[{'#' * block}{'.' * (bar_length - block)}] {percentage:.2f}%"
+    sys.stdout.write(progress)
+    sys.stdout.flush()
+
 def main():
 
     background_handler = ScaledBackground(BG, max_zoom_level=20)
@@ -60,7 +72,7 @@ def main():
     zoom_level = 10.0
 
     # IN PROCESS
-    fps_multiplier = 1
+    speedDelta = 0
 
     move_camera_x = offset_x # /10* (int(zoom_level))
     move_camera_y = offset_y # /10* (int(zoom_level))
@@ -80,32 +92,28 @@ def main():
 
      # Create Sun and Planets
     sun = SUN(WIDTH // 2, HEIGHT // 2, 1.989, 4, "Sun")#, Sun_info)
-    Mercury = PLANET("Mercury")#, Mercury_info)
-    Venus = PLANET("Venus")#, Venus_info)
-    Earth = PLANET("Earth")#, Earth_info)
-    Mars = PLANET("Mars")#, Mars_info)
-    Jupiter = PLANET("Jupiter")#, Jupiter_info)
-    Saturn = PLANET("Saturn")#, Saturn_info)
-    Uranus = PLANET("Uranus")#, Uranus_info)
-    Neptune = PLANET("Neptune")#, Neptune_info)
+    Mercury = PLANET("Mercury", 1)#, Mercury_info)
+    Venus = PLANET("Venus", 2)#, Venus_info)
+    Earth = PLANET("Earth", 3)#, Earth_info)
+    Mars = PLANET("Mars", 4)#, Mars_info)
+    Jupiter = PLANET("Jupiter", 5)#, Jupiter_info)
+    Saturn = PLANET("Saturn", 6)#, Saturn_info)
+    Uranus = PLANET("Uranus", 7)#, Uranus_info)
+    Neptune = PLANET("Neptune", 8)#, Neptune_info)
 
     # slider (pos, name, multiplier)
     sunMass = SLIDER(sliderWidth / 2, "SUN MASS", int(sun.mass), int(sun.mass) * SCALE)
     zoom = SLIDER( sliderWidth, "ZOOM IN/OUT", int(zoom_level), 10)
-    speedUp = SLIDER(sliderWidth/5, "SPEED UP/ SLOW DOWN", int(fps_multiplier), 1000)
+    speedUp = SLIDER(sliderWidth/2, "SPEED UP/ SLOW DOWN", int(speedDelta), 5)
 
     objects = [Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune]# Add all planets to array
     allTogglable = [desc_checkbox, sliderList_checkbox]  #checkbox array
     allSliders = [sunMass, zoom, speedUp] # slider array
 
-    displacement = math.sqrt((Mercury.x - sun.x)**2 + (Mercury.y - sun.y) ** 2) # Calculates distance from the sun
-    print(displacement)
-    force = (GRAVCONST * sun.mass) / ((displacement*SCALE) ** 2) # Force Equation from PHYSICS
-    print(force)
-
-    acceleration = force/(1e4)
-
-    print(acceleration)
+    # for i in range(101):
+    #     time.sleep(random.random())
+    #     progress_bar(i)
+    # print("\nDone!")
 
     # Run program
     while running:
@@ -168,6 +176,7 @@ def main():
                             if sliders.toggleSlider:
                                 sliders.pos = max(0, min(sliderWidth, mouse_pos[0] - sliderX))
                                 deltaSlider = max(1, (sliders.pos / sliderWidth) * sliders.deltaAmnt)
+                                deltaSliderSpeed = max(-sliders.deltaAmnt, ((sliders.pos / sliderWidth)-0.5) * sliders.deltaAmnt*2)
 
                                 sliders.changingVal = int(deltaSlider)
                                 match sliders.name:
@@ -176,7 +185,8 @@ def main():
                                     case "ZOOM IN/OUT":
                                         zoom_level = deltaSlider
                                     case "SPEED UP/ SLOW DOWN":
-                                        fps_multiplier = deltaSlider
+                                        sliders.changingVal = int(deltaSliderSpeed)
+                                        speedDelta = deltaSliderSpeed
 
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -198,7 +208,7 @@ def main():
                                 camera_follow = True
                                 break
                     elif selected_planet and desc_checkbox.checked: # check if moving the planet is allowed
-                        selected_planet = movePlanet((selected_planet.x, selected_planet.y), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
+                        selected_planet = movePlanet((selected_planet.cameraX, selected_planet.cameraY), (mouse_pos[0] + offset_x, mouse_pos[1] + offset_y), selected_planet)
                         selected_planet = None
                     elif selected_planet and clickOnPlanet and camera_follow: # check if already following planet so once clicked move away
                         camera_follow = False
@@ -219,9 +229,9 @@ def main():
             for obj in objects:
                 obj.cameraX = (obj.x - WIDTH//2) * (zoom_level/10) + WIDTH // 2 
                 obj.cameraY = (obj.y - HEIGHT//2) * (zoom_level/10) + HEIGHT // 2
-                if(0<= obj.cameraX - move_camera_x <= SCREEN_WIDTH and 0 <= obj.cameraY - move_camera_y <= SCREEN_HEIGHT):
+                if(0<= obj.cameraX - move_camera_x + obj.rad and obj.cameraX - move_camera_x - (obj.rad*2)<= SCREEN_WIDTH and 0 <= obj.cameraY - move_camera_y + obj.rad and obj.cameraY - move_camera_y - (obj.rad*2) <= SCREEN_HEIGHT):
                     obj.draw(zoom_level, move_camera_x, move_camera_y)
-                obj.move(sun)
+                obj.move(int(speedDelta), sun)
 
                 collided_sun = math.sqrt((obj.x - sun.x)**2 + (obj.y - sun.y)**2) <= SUN_RADIUS*(zoom_level/10)
                 

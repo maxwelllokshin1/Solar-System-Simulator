@@ -46,21 +46,21 @@ class SUN:
 # Create PLANET class
 class PLANET:
     # Define all attributes x, y, vel_x, vel_y, mass, name, img
-    def __init__(self, name):
+    def __init__(self, name, planetNum):
 
-        print(f"{name}: ")
+        # print(f"{name}: ")
 
         #self.info = info
         cur_info = get_info(name)
         daysInYear = cur_info['sideralOrbit']
-        randDay = random.randint(0, int(daysInYear))
+        randDay = 0#random.randint(0, int(daysInYear))
 
-        print("(randDay, daysInYear)", (randDay, daysInYear))
+        # print("(randDay, daysInYear)", (randDay, daysInYear))
         angle = (randDay / daysInYear) * 360
         if(angle > 180):
             angle -= 360
 
-        print("angle", angle)
+        # print("angle", angle)
         
         displacement = cur_info['semimajorAxis']
         if(abs(angle) <= 60):
@@ -74,24 +74,23 @@ class PLANET:
 
         displacement /= SCALE
 
-        print(f"displacement {displacement}")
+        # print(f"displacement {displacement}")
 
         self.x =  WIDTH//2 + ((displacement)*math.cos(math.radians(angle)))
         self.y =  HEIGHT//2 - ((displacement)*math.sin(math.radians(angle)))
 
         velocity = (2*math.pi * displacement) / daysInYear
 
-        velocity /= 10
-        print(f"velocity {velocity}")
+        # print(f"velocity {velocity}")
 
         self.vel_x = ((velocity)*math.cos(math.radians(angle)))
         self.vel_y = ((velocity)*math.sin(math.radians(angle)))
 
-        temp = -self.vel_x
+        temp = self.vel_x
         self.vel_x = self.vel_y
         self.vel_y = temp
 
-        print("(self.vel_x, self.vel_y)", (self.vel_x, self.vel_y))
+        # print("(self.vel_x, self.vel_y)", (self.vel_x, self.vel_y))
 
 
         # self.vel_x = vel_x/VELOCITY_SCALE
@@ -102,7 +101,7 @@ class PLANET:
         productSecond = productFirst / daysInYear
         self.mass = (productSecond**2)/(GRAVCONST)
 
-        print(f"mass {self.mass}")
+        # print(f"mass {self.mass}")
         self.name = name
         name+=".png"
         self.img = pygame.image.load(name)
@@ -110,29 +109,46 @@ class PLANET:
         self.cameraY = (self.y - HEIGHT//2) + HEIGHT // 2
         self.hoverPlanet = False
         self.rad = PLANET_RADIUS
+
+        self.timer = 0
+
+        time.sleep(random.random())
+        progress_bar(planetNum)
         
     
     # Move this object
-    def move(self, obj=None):
+    def move(self, speedDelta, obj=None):
 
-        # move based on how much gravity will pull the planets using suns mass
-        displacement = math.sqrt((self.x - obj.x)**2 + (self.y - obj.y) ** 2) # Calculates distance from the sun
-        force = (GRAVCONST * obj.mass) / ((displacement*SCALE) ** 2) # Force Equation from PHYSICS
-        
-        acceleration = force/SCALE  # Calculate acceleration using force / mass
-        angle = math.atan2(obj.y - self.y, obj.x - self.x) # now find the angle using opp/adj
+        if speedDelta >= 0:
+            self.timer+=1
+        else:
+            self.timer-=1
+        if (speedDelta >= 0 and self.timer >= (10 ** speedDelta)) or (speedDelta <0 and self.timer <= -(10 ** abs(speedDelta))):
+            self.timer = 0
+            # move based on how much gravity will pull the planets using suns mass
+            displacement = math.sqrt((self.x - obj.x)**2 + (self.y - obj.y) ** 2) # Calculates distance from the sun
+            force = (GRAVCONST * obj.mass) / ((displacement*SCALE) ** 2) # Force Equation from PHYSICS
+            
+            acceleration = force/SCALE  # Calculate acceleration using force / mass
+            angle = math.atan2(obj.y - self.y, obj.x - self.x) # now find the angle using opp/adj
 
-        acceleration_x = acceleration * math.cos(angle) # find the component for x using Ax forumla
-        acceleration_y = acceleration * math.sin(angle) # find component for y using Ay formula
+            acceleration_x = acceleration * math.cos(angle) # find the component for x using Ax forumla
+            acceleration_y = acceleration * math.sin(angle) # find component for y using Ay formula
 
-        # change the velocities based on acceleration
-        self.vel_x += acceleration_x  
-        self.vel_y += acceleration_y
+            # temp = acceleration_x
+            # acceleration_x = acceleration_y
+            # acceleration_y = temp
 
-        timeVelX = self.vel_x / 1
-        timeVelY = self.vel_y / 1
+            # change the velocities based on acceleration
+            self.vel_x += acceleration_x
+            self.vel_y += acceleration_y
 
-        # change positions based off velocities
+
+        timeVelX = self.vel_x / (10 ** (speedDelta+1))
+        timeVelY = self.vel_y / (10 ** (speedDelta+1))
+
+
+            # change positions based off velocities
         self.x += timeVelX
         self.y += timeVelY
     
@@ -157,9 +173,9 @@ class PLANET:
         if self.hoverPlanet:
             pygame.draw.circle(win, (255,255,255), (self.cameraX - offset_x, self.cameraY - offset_y), self.rad, 5)
 
-        pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x + (self.vel_x*10), self.cameraY - offset_y), 2) 
-        pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x, self.cameraY - offset_y - (self.vel_y*10)), 2) 
-        # pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x, self.cameraY - offset_y - (self.vel_y*10)), 2)        
+        # pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x + (self.vel_x*10), self.cameraY - offset_y), 2) 
+        # pygame.draw.line(win, WHITE, (self.cameraX - offset_x, self.cameraY - offset_y), (self.cameraX - offset_x, self.cameraY - offset_y + (self.vel_y*10)), 2) 
+     
     
     def handle_hover(self, mouse_pos, offset_x, offset_y):
         if math.sqrt((mouse_pos[0] + offset_x - self.cameraX)**2 + ((mouse_pos[1] + offset_y) - self.cameraY)**2) <= self.rad:
@@ -234,8 +250,8 @@ def movePlanet(Location, mouse, obj):
     t_x, t_y = Location # Second location when clicked  
     m_x, m_y = mouse # Initial clicked point
 
-    vel_x = ((m_x - t_x)*2) / VELOCITY_SCALE
-    vel_y = ((m_y - t_y)*2) / VELOCITY_SCALE
+    vel_x = ((m_x - t_x)*2) / 10
+    vel_y = ((m_y - t_y)*2) / 10
     
     obj.vel_x += vel_x
     obj.vel_y += vel_y
